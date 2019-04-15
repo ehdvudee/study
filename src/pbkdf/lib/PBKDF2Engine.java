@@ -1,0 +1,205 @@
+/*
+ * A free Java implementation of Password Based Key Derivation Function 2 as
+ * defined by RFC 2898. Copyright 2007, 2014, Matthias G&auml;rtner
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
+
+package pbkdf.lib;
+
+/**
+ * This <b>Password Based Key Derivation Function 2</b> implementation.
+ * <hr>
+ * Request for Comments: 2898 PKCS #5: Password-Based Cryptography Specification
+ * <p>
+ * Version 2.0
+ *
+ * <p>
+ * PBKDF2 (P, S, c, dkLen)
+ *
+ * <p>
+ * Options:
+ * <ul>
+ * <li>PRF underlying pseudorandom function (hLen denotes the length in octets
+ * of the pseudorandom function output). PRF is pluggable.</li>
+ * </ul>
+ *
+ * <p>
+ * Input:
+ * <ul>
+ * <li>P password, an octet string</li>
+ * <li>S salt, an octet string</li>
+ * <li>c iteration count, a positive integer</li>
+ * <li>dkLen intended length in octets of the derived key, a positive integer,
+ * at most (2^32 - 1) * hLen</li>
+ * </ul>
+ *
+ * <p>
+ * Output:
+ * <ul>
+ * <li>DK derived key, a dkLen-octet string</li>
+ * </ul>
+ *
+ * @see <a href="http://tools.ietf.org/html/rfc2898">RFC 2898</a>
+ * @author Matthias G&auml;rtner
+ */
+public class PBKDF2Engine implements PBKDF2
+{
+    protected final PRF prf;
+
+    public PBKDF2Engine( String algorithm ) {
+    	prf = new MacBasedPRF( algorithm );
+    }
+    
+    public PBKDF2Engine( String algorithm, String provider ) {
+    	prf = new MacBasedPRF( algorithm, provider );
+    }
+    
+    public byte[] deriveKey( byte[] P, byte[] salt, int iterationCount, int derivedKeyLength )
+    {
+        prf.init(P);
+
+        if( derivedKeyLength <= 0 ) {
+        	derivedKeyLength = prf.getHLen();
+        }
+
+        return PBKDF2( prf, salt, iterationCount, derivedKeyLength );
+    }
+
+    /**
+     * Core Password Based Key Derivation Function 2.
+     *
+     * @see <a href="http://tools.ietf.org/html/rfc2898">RFC 2898 5.2</a>
+     * @param prf
+     *            Pseudo Random Function (i.e. HmacSHA1)
+     * @param S
+     *            Salt as array of bytes. <code>null</code> means no salt.
+     * @param c
+     *            Iteration count (see RFC 2898 4.2)
+     * @param dkLen
+     *            desired length of derived key.
+     * @return internal byte array
+     */
+    protected byte[] PBKDF2(PRF prf, byte[] S, int c, int dkLen)
+    {
+        if (S == null)
+        {
+            S = new byte[0];
+        }
+        int hLen = prf.getHLen();
+        int l = ceil(dkLen, hLen);
+        int r = dkLen - (l - 1) * hLen;
+        byte T[] = new byte[l * hLen];
+        int ti_offset = 0;
+        for (int i = 1; i <= l; i++)
+        {
+            _F(T, ti_offset, prf, S, c, i);
+            ti_offset += hLen;
+        }
+        if (r < hLen)
+        {
+            // Incomplete last block
+            byte DK[] = new byte[dkLen];
+            System.arraycopy(T, 0, DK, 0, dkLen);
+            return DK;
+        }
+        return T;
+    }
+
+    /**
+     * Integer division with ceiling function.
+     *
+     * @see <a href="http://tools.ietf.org/html/rfc2898">RFC 2898 5.2 Step 2.</a>
+     * @param a Numerator
+     * @param b Denominator
+     * @return ceil(a/b)
+     */
+    protected int ceil(int a, int b)
+    {
+        int m = 0;
+        if (a % b > 0)
+        {
+            m = 1;
+        }
+        return a / b + m;
+    }
+
+    /**
+     * Function F.
+     *
+     * @see <a href="http://tools.ietf.org/html/rfc2898">RFC 2898 5.2 Step 3.</a>
+     * @param dest
+     *            Destination byte buffer
+     * @param offset
+     *            Offset into destination byte buffer
+     * @param prf
+     *            Pseudo Random Function
+     * @param S
+     *            Salt as array of bytes
+     * @param c
+     *            Iteration count
+     * @param blockIndex
+     *            The block index (&gt;= 1).
+     */
+    protected void _F(byte[] dest, int offset, PRF prf, byte[] S, int c, int blockIndex)
+    {
+        int hLen = prf.getHLen();
+        byte U_r[] = new byte[hLen];
+
+        // U0 = S || INT (i);
+        byte U_i[] = new byte[S.length + 4];
+        System.arraycopy(S, 0, U_i, 0, S.length);
+        INT(U_i, S.length, blockIndex);
+
+        for (int i = 0; i < c; i++)
+        {
+            U_i = prf.doFinal(U_i);
+            xor(U_r, U_i);
+        }
+        System.arraycopy(U_r, 0, dest, offset, hLen);
+    }
+
+    /**
+     * Block-Xor. Xor source bytes into destination byte buffer. Destination
+     * buffer must be same length or less than source buffer.
+     *
+     * @param dest destination byte buffer
+     * @param src source bytes
+     */
+    protected void xor(byte[] dest, byte[] src)
+    {
+        for (int i = 0; i < dest.length; i++)
+        {
+            dest[i] ^= src[i];
+        }
+    }
+
+    /**
+     * Four-octet encoding of the integer i, most significant octet first.
+     *
+     * @see <a href="http://tools.ietf.org/html/rfc2898">RFC 2898 5.2 Step 3.</a>
+     * @param dest destination byte buffer
+     * @param offset zero-based offset into dest
+     * @param i the integer to encode
+     */
+    protected void INT(byte[] dest, int offset, int i)
+    {
+        dest[offset + 0] = (byte) (i / (256 * 256 * 256));
+        dest[offset + 1] = (byte) (i / (256 * 256));
+        dest[offset + 2] = (byte) (i / (256));
+        dest[offset + 3] = (byte) (i);
+    }
+}
