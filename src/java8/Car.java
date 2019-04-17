@@ -7,6 +7,8 @@ public class Car implements Vehicle, FourWheeler {
 		FourWheeler.super.print();
 		Vehicle.blowHorn();
 		System.out.println(" I am a car ! ");
+
+
 	}
 }
 

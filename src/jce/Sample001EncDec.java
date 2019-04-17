@@ -17,7 +17,7 @@ public class Sample001EncDec {
 		Cipher cipher = Cipher.getInstance( "AES/ECB/PKCS5Padding" );
 		byte[] keyBytes = SecureRandom.getInstance( "SHA1PRNG" ).generateSeed( 16 );
 		
-		byte[] plaintext = "asjrnox,aldkwjjifeahiwefiphaweiphfaweihpfaewihpfaehpifaweihpafwepihrjwwdwieihfhihiveihevjefoefo".getBytes();
+		byte[] plaintext = "asjrnoxaldkwjjifeahiwefiphaweiphfaweihpfaewihpfaehpifaweihpafwepihrjwwdwieihfhihiveihevjefoefo".getBytes();
 		
 		int offset = 10;
 		int length = 32;
