@@ -18,7 +18,7 @@ import java.util.Arrays;
 public class Sample021PKCS11 {
     public static void main(String[] args) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
 
-        // way - 2
+        // init pkcs11 provider
         File tmpConfigFile = File. createTempFile( "eToken", "cfg" );
         tmpConfigFile.deleteOnExit();
 
@@ -29,16 +29,16 @@ public class Sample021PKCS11 {
         configWriter.println( "description = eToken config" );
         configWriter.println( "slot = 0" );
 
-        System.out.println( tmpConfigFile.getAbsolutePath() );
-
         SunPKCS11 provider = new SunPKCS11( tmpConfigFile.getAbsolutePath() );
         Security.addProvider( provider );
 
         char[] pin = "dusrn2xla!@".toCharArray();
 
+        // load PKCS11 key tore
         KeyStore keyStoreP11 = KeyStore.getInstance( "PKCS11", provider );
         keyStoreP11.load( null, pin );
 
+        // Generate KEK Using HSM
         Key key = KeyGenerator.getInstance( "AES", provider ).generateKey();
 
         PrivateKey priKey = (PrivateKey) keyStoreP11.getKey( "EE49E01E620374FC", "123".toCharArray() );
@@ -46,10 +46,11 @@ public class Sample021PKCS11 {
 
         Cipher cipher = Cipher.getInstance( "RSA", provider );
 
+        // Wrapping
         cipher.init( Cipher.WRAP_MODE, cert.getPublicKey() );
-
         byte[] wrrapedKey = cipher.wrap( key );
 
+        //UnWrapping
         cipher.init( Cipher.UNWRAP_MODE, priKey );
         Key unWrrapedKey = cipher.unwrap( wrrapedKey, "RSA", Cipher.SECRET_KEY );
 
