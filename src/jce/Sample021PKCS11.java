@@ -38,7 +38,7 @@ public class Sample021PKCS11 {
         KeyStore keyStoreP11 = KeyStore.getInstance( "PKCS11", provider );
         keyStoreP11.load( null, pin );
 
-        // Generate KEK Using HSM
+        // Generate Key Using HSM
         Key key = KeyGenerator.getInstance( "AES", provider ).generateKey();
 
         PrivateKey priKey = (PrivateKey) keyStoreP11.getKey( "EE49E01E620374FC", "123".toCharArray() );
@@ -58,5 +58,7 @@ public class Sample021PKCS11 {
         System.out.println( Arrays.toString( key.getEncoded() ) );
         System.out.println( Arrays.toString( wrrapedKey ) );
         System.out.println( Arrays.toString( unWrrapedKey.getEncoded() ) );
+
+        System.out.println( provider.values() );
     }
 }
