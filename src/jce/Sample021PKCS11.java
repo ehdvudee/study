@@ -22,7 +22,8 @@ public class Sample021PKCS11 {
         File tmpConfigFile = File. createTempFile( "eToken", "cfg" );
         tmpConfigFile.deleteOnExit();
 
-        PrintWriter configWriter = new PrintWriter( new FileOutputStream( tmpConfigFile ), true );
+        PrintWriter configWriter;
+        configWriter = new PrintWriter( new FileOutputStream( tmpConfigFile ), true );
 
         configWriter.println( "name=eToken" );
         configWriter.println( "library=C:\\windows\\system32\\eTPKCS11.dll" );
@@ -48,16 +49,16 @@ public class Sample021PKCS11 {
 
         // Wrapping
         cipher.init( Cipher.WRAP_MODE, cert.getPublicKey() );
-        byte[] wrrapedKey = cipher.wrap( key );
+        byte[] wrappedKey = cipher.wrap( key );
 
         //UnWrapping
         cipher.init( Cipher.UNWRAP_MODE, priKey );
-        Key unWrrapedKey = cipher.unwrap( wrrapedKey, "RSA", Cipher.SECRET_KEY );
+        Key unWrappedKey = cipher.unwrap( wrappedKey, "RSA", Cipher.SECRET_KEY );
 
 
         System.out.println( Arrays.toString( key.getEncoded() ) );
-        System.out.println( Arrays.toString( wrrapedKey ) );
-        System.out.println( Arrays.toString( unWrrapedKey.getEncoded() ) );
+        System.out.println( Arrays.toString( wrappedKey ) );
+        System.out.println( Arrays.toString( unWrappedKey.getEncoded() ) );
 
         System.out.println( provider.values() );
     }

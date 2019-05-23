@@ -17,7 +17,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Sample001EncDec2 {
 	 public static void main( String[] args ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-		
+
+		 System.out.println( Arrays.toString( SecureRandom.getInstance("SHA1PRNG").generateSeed(20) ) );
+		 System.out.println( Arrays.toString( SecureRandom.getInstance("SHA1PRNG").generateSeed(16) ) );
+		 System.out.println( Arrays.toString( SecureRandom.getInstance("SHA1PRNG").generateSeed(18) ) );
 		 byte[] keyBytes = SecureRandom.getInstance("SHA1PRNG").generateSeed(16);
 		 byte[] iv = SecureRandom.getInstance("SHA1PRNG").generateSeed(16);
 		 AlgorithmParameterSpec parameter = new IvParameterSpec( iv );
