@@ -49,10 +49,8 @@ public class Sample022DividedEncrypt {
         List<byte[]> plaintextList = sliceByteArray( plaintext, enabledEncryptSize );
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        if ( plaintext.length > enabledEncryptSize ) {
-            for ( byte[] plain : plaintextList ) {
-                bos.write( cipher.doFinal( plain ) );
-            }
+        for ( byte[] plain : plaintextList ) {
+            bos.write( cipher.doFinal( plain ) );
         }
 
         return bos.toByteArray();
