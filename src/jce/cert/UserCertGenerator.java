@@ -52,10 +52,9 @@ public class UserCertGenerator extends X509V3CertGenerator {
 		exts.set( AuthorityKeyIdentifierExtension.NAME,
 				new AuthorityKeyIdentifierExtension(
 						new KeyIdentifier( getIssuerCert().getPublicKey()),
-						new GeneralNames().add( new GeneralName(
-								new X500Name( getIssuerCert().getSubjectDN().getName() ) ) ),
-						new SerialNumber( getIssuerCert().getSerialNumber() )
-						));
+						null,
+						null
+				));
 
 		return exts;
 	}

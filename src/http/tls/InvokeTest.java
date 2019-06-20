@@ -35,8 +35,8 @@ public class InvokeTest {
 		
 		// if usig TLSv1.1 in java 7 
 //		System.setProperty("https.protocols", "TCLSv1,TLSv1.1,TLSv1.2");
-		
-		String host = "https://example.com";
+
+		String host = "https://test-magickms.dreamsecurity.com";
 		String url = "/test/home.do";
 		SSLContext sc = getSSLContext( cert );
 		URL u = new URL( host + url );
@@ -65,7 +65,7 @@ public class InvokeTest {
 		// common java se 6 is not avaiable TLSv1.1 and TLSv1.2
 		// supported java se 6 is avaiable( TLSv1.1 : from u111, TLSv1.2 : from u121 )
 		// Refer to BOUNCY CASTLE and Apache HTTP Client, to use TLSv1.1, TLSv1.2 in java se 6
-		SSLContext sc = SSLContext.getInstance( "TLSv1.1" );
+		SSLContext sc = SSLContext.getInstance( "TLSv1.2" );
 		sc.init( null, tmf.getTrustManagers(), null );
 		
 		return sc;

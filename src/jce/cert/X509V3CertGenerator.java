@@ -62,7 +62,8 @@ public abstract class X509V3CertGenerator {
 
 //		BigInteger serialNumber = new BigInteger( 64, new SecureRandom() );
 		AlgorithmId sigAlgId = new AlgorithmId( AlgorithmId.sha256WithRSAEncryption_oid );
-		
+
+
 		if ( issuerCert != null ) {
 			info.set( X509CertInfo.ISSUER, new X500Name( issuerCert.getSubjectDN().getName() ) );
 			info.set( X509CertInfo.SUBJECT, new X500Name( dn ) );
@@ -77,18 +78,19 @@ public abstract class X509V3CertGenerator {
 		info.set( X509CertInfo.VERSION, new CertificateVersion( CertificateVersion.V3 ) );
 		info.set( X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId( sigAlgId ) );
 		
-		X509CertImpl certificate = new X509CertImpl( info );
-		certificate.sign( issuer, algorithm );
-
-		sigAlgId = (AlgorithmId) certificate.get( X509CertImpl.SIG_ALG );
-		info.set( CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, sigAlgId );
-		
 		CertificateExtensions exts = generateCertificateExtensions( subject.getPublic() );
 		
 		if( exts != null ) {
 			info.set( X509CertInfo.EXTENSIONS, exts );
 		}
-		
+
+		// Sign the cert to identify the algorithm that's used.
+		X509CertImpl certificate = new X509CertImpl( info );
+		certificate.sign( issuer, algorithm );
+
+		// Update the algorith, and resign.
+		sigAlgId = (AlgorithmId)certificate.get( X509CertImpl.SIG_ALG );
+		info.set( CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, sigAlgId );
 		certificate = new X509CertImpl( info );
 		certificate.sign( issuer, algorithm );
 

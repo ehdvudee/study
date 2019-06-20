@@ -19,17 +19,21 @@ import jce.cert.CertGeneratorFactory;
 import jce.cert.RootCertGenerator;
 import jce.cert.UserCertGenerator;
 import jce.util.DataTypeUtil;
+import org.junit.Test;
 
 public class TestDrive {
-	public static void main( String[] args ) throws NoSuchAlgorithmException, InvalidKeyException, CertificateException, NoSuchProviderException, SignatureException, IOException {
+
+	@Test
+	public void main() throws NoSuchAlgorithmException, InvalidKeyException, CertificateException, NoSuchProviderException, SignatureException, IOException {
 		
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance( "RSA" );
 		keyPairGenerator.initialize( 2048 );
+
 		KeyPair rootKeyPair = keyPairGenerator.generateKeyPair();
 		KeyPair caKeyPair = keyPairGenerator.generateKeyPair();
 		KeyPair eeCertKeyPair = keyPairGenerator.generateKeyPair();
 		
-		X509Certificate rootCert = CertGeneratorFactory.building()
+		X509Certificate rootCert =  new CertGeneratorFactory().getBuilder()
 				.subject( rootKeyPair )
 				.validity( 365 )
 				.algorithm( "SHA256withRSA" )
@@ -40,7 +44,7 @@ public class TestDrive {
 				.build()
 				.generateCertificate();
 		
-		X509Certificate caCert = CertGeneratorFactory.building()
+		X509Certificate caCert = new CertGeneratorFactory().getBuilder()
 				.subject( caKeyPair )
 				.validity( 365 )
 				.algorithm( "SHA256withRSA" )
@@ -59,7 +63,7 @@ public class TestDrive {
 		dnsName.add( "*.m.wikipedia.org" );
 		dnsName.add( "*.zero.wikipedia.org" );
 		
-		X509Certificate eeCert = CertGeneratorFactory.building()
+		X509Certificate eeCert = new CertGeneratorFactory().getBuilder()
 				.subject( eeCertKeyPair )
 				.validity( 365 )
 				.algorithm( "SHA256withRSA" )

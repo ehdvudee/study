@@ -13,8 +13,12 @@ import sun.security.x509.GeneralName;
 import sun.security.x509.GeneralNames;
 
 public class CertGeneratorFactory {
-	
-	public static class Builder {
+
+	public Builder getBuilder() {
+		return new Builder();
+	}
+
+	public class Builder {
 		private KeyPair subject;
 		private GeneralNames subjectAltName;
 		private PrivateKey issuer;
@@ -61,12 +65,8 @@ public class CertGeneratorFactory {
 			return newInstance( this, t );
 		}
 	}
-	
-	public static CertGeneratorFactory.Builder building() {
-		return new Builder();
-	}
-	
-	private static X509V3CertGenerator newInstance( Builder builder, Class<?> type ) {
+
+	private X509V3CertGenerator newInstance( Builder builder, Class<?> type ) {
 		if ( UserCertGenerator.class.isAssignableFrom( type ) ) {
 			return new UserCertGenerator( builder );
 		} else if ( CaCertGenerator.class.isAssignableFrom( type ) ) {
