@@ -47,7 +47,7 @@ public class Sample023P7CMS {
         signature.update( data );
         byte[] signedData = signature.sign();
 
-        X500Name xName = X500Name.asX500Name( cert.getSubjectX500Principal() );
+        X500Name xName = X500Name.asX500Name( cert.getIssuerX500Principal() );
         BigInteger serial = cert.getSerialNumber();
         AlgorithmId digestAlgorithmId = new AlgorithmId( AlgorithmId.SHA256_oid );
         AlgorithmId signAlgorithmId = new AlgorithmId( AlgorithmId.sha256WithRSAEncryption_oid );
@@ -65,11 +65,15 @@ public class Sample023P7CMS {
 
         byte[] encodedPKCS7 = bOut.toByteArray();
 
-        System.out.println( DatatypeConverter.printHexBinary(encodedPKCS7 ) );
+        if ( pkcs7.verify() == null ) System.out.println(" ;; nono 잘못 만듬");
+
+        System.out.println( DatatypeConverter.printHexBinary( encodedPKCS7 ) );
 
         File userP7 = new File( "./p7/dev.p7");
         try ( FileOutputStream os = new FileOutputStream( userP7 ) ) {
             os.write( encodedPKCS7 );
         }
+
+        System.out.println( DatatypeConverter.printHexBinary( data ) );
     }
 }
