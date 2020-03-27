@@ -1,10 +1,14 @@
-package http.tls;
+package http.pure.tls;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
+import org.junit.Test;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -14,15 +18,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import javax.xml.bind.DatatypeConverter;
-
-import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
-import org.junit.Test;
 
 public class InvokeTest {
 	

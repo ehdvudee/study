@@ -1,17 +1,17 @@
-package http.sample;
+package http.pure.sample;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-
-import http.base.TestBase;
-import http.invoker.KmsInvoker;
+import http.pure.base.TestBase;
+import http.pure.invoker.KmsInvoker;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class GetKey {
 	

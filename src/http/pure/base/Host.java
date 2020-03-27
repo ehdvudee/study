@@ -1,4 +1,4 @@
-package http.base;
+package http.pure.base;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
