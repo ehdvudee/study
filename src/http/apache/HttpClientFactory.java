@@ -76,35 +76,33 @@ public class HttpClientFactory {
         return instance;
     }
 
-    public HttpClient getHttpClient(String host, int port ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
-        return getHttpClient( host, port, null );
+    public HttpClient getHttpClient( String host ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        return getHttpClient( host, null );
     }
 
-    public HttpClient getHttpClient( String host, int port, byte[] cert ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
-        return getHttpClient( host, port, cert, false );
+    public HttpClient getHttpClient( String host, byte[] cert ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        return getHttpClient( host, cert, false );
     }
 
-    public HttpClient getHttpClient( String host, int port, byte[] cert, boolean hostNameChk ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
-        return getHttpClient( host, port, cert, hostNameChk, EnumTLS.SSL );
+    public HttpClient getHttpClient( String host, byte[] cert, boolean hostNameChk ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        return getHttpClient( host, cert, hostNameChk, EnumTLS.SSL );
     }
 
-    public HttpClient getHttpClient( String host, int port, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
-        String key = new StringBuilder( host ).append( port ).toString();
-
-        HttpClient httpClient = httpClientMap.get( key );
+    public HttpClient getHttpClient( String host, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        HttpClient httpClient = httpClientMap.get( host );
         if ( httpClient == null ) {
             synchronized ( HttpClientFactory.class ) {
-                if ( httpClientMap.get( key ) == null ) {
-                    createHttpClient( key, host, cert, hostNameChk, enumTls );
+                if ( httpClientMap.get( host ) == null ) {
+                    createHttpClient( host, cert, hostNameChk, enumTls );
                 }
-                httpClient = httpClientMap.get( key );
+                httpClient = httpClientMap.get( host );
             }
         }
 
         return httpClient;
     }
 
-    private void createHttpClient(String key, String host, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    private void createHttpClient( String host, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         PoolingHttpClientConnectionManager connManager;
 
         if ( host.contains( "https://" ) && cert != null ) {
@@ -137,7 +135,7 @@ public class HttpClientFactory {
                 .setDefaultRequestConfig( requestConfig )
                 .build();
 
-        httpClientMap.put( key, httpClient );
+        httpClientMap.put( host, httpClient );
 
         IdleConnectionMonitorThread staleMonitor = new IdleConnectionMonitorThread( connManager );
         staleMonitor.start();

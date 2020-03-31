@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public interface IInvoker {
 
-    public String invokeHttp(String target, Map<String, String> headers, String httpMethod, String body );
+    // protocol + (usbdomain) + domian + TLD
+    public String invokeHttp( String host, String path, String httpMethod, Map<String, String> headers, String body );
 
 }

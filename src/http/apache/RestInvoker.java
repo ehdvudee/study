@@ -5,25 +5,20 @@ import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.Map;
 
 public class RestInvoker implements IInvoker {
 
-    private final String host;
-    private final int port;
     private final HttpClient httpClient;
 
-    public RestInvoker( String host, int port, HttpClient httpClient ) {
-        this.host = host;
-        this.port = port;
+    public RestInvoker( HttpClient httpClient ) {
         this.httpClient = httpClient;
     }
 
     @Override
-    public String invokeHttp(String target, Map<String, String> headers, String httpMethod, String body) {
+    public String invokeHttp( String host, String path, String httpMethod, Map<String, String> headers, String body ) {
         try {
-            HttpRequestBase httpReq = getHttpUriRequest( host, port, httpMethod, target);
+            HttpRequestBase httpReq = getHttpUriRequest( host, path, httpMethod );
 
             setDefaultHeaders( httpReq );
             if ( headers != null ) {
@@ -42,12 +37,10 @@ public class RestInvoker implements IInvoker {
         }
     }
 
-    private HttpRequestBase getHttpUriRequest( String host, int port, String httpMethod, String target ) {
+    private HttpRequestBase getHttpUriRequest( String host, String path, String httpMethod ) {
         String uri = new StringBuilder( host )
-                .append( ":" )
-                .append( port )
                 .append( "/" )
-                .append( target ).toString();
+                .append( path ).toString();
 
         if ( httpMethod.equalsIgnoreCase( "GET" ) ) {
             return new HttpGet( uri );
@@ -75,16 +68,9 @@ public class RestInvoker implements IInvoker {
         ConcreteInjector injector = new ConcreteInjector();
 
         String host = injector.getHostAl();
-        int port = injector.getPortAl();
-        HttpClient httpClient = injector.getHttpClient( host, port );
+        IInvoker invoker = injector.getInvoker( host );
 
-        IInvoker invoker = new RestInvoker(
-                host,
-                port,
-                httpClient
-        );
-
-        String ret = invoker.invokeHttp( "df", null, "GET", null );
+        String ret = invoker.invokeHttp( host, "/company/user-info/ehdvudee", "GET", null,null );
 
         System.out.println( ret );
     }
