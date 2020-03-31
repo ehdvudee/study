@@ -73,11 +73,10 @@ public class HttpClientFactory {
         return keepAliave;
     };
 
-    private HttpClientFactory() { this( null, false ); }
     private HttpClientFactory( byte[] cert, boolean hostChk ) { this.cert = cert; this.hostChk = hostChk; }
 
     public static HttpClientFactory getInstance() {
-        return new HttpClientFactory();
+        return getInstance( null, false );
     }
 
     public static HttpClientFactory getInstance( byte[] cert, boolean hostChk ) {
