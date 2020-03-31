@@ -11,7 +11,6 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeaderElementIterator;
@@ -47,15 +46,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpClientFactory {
 
+    private static final HttpClientFactory instance = new HttpClientFactory();
     private final Map<String, HttpClient> httpClientMap = new HashMap<>();
 
     private final int maxTotalConnection = 400;
     private final int socketTimeOut = 30 * 1000;
     private final int connectionTimeOut = 5 * 1000;
     private final int keepAliave = 5 * 60 * 1000;
-
-    private final byte[] cert;
-    private final boolean hostChk;
 
     private ConnectionKeepAliveStrategy keepAliavestrategy = (response, context) -> {
         HeaderElementIterator itr = new BasicHeaderElementIterator( response.headerIterator( HTTP.CONN_KEEP_ALIVE ) );
@@ -73,24 +70,32 @@ public class HttpClientFactory {
         return keepAliave;
     };
 
-    private HttpClientFactory( byte[] cert, boolean hostChk ) { this.cert = cert; this.hostChk = hostChk; }
+    private HttpClientFactory() {}
 
     public static HttpClientFactory getInstance() {
-        return getInstance( null, false );
-    }
-
-    public static HttpClientFactory getInstance( byte[] cert, boolean hostChk ) {
-        return new HttpClientFactory( cert, hostChk );
+        return instance;
     }
 
     public HttpClient getHttpClient(String host, int port ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        return getHttpClient( host, port, null );
+    }
+
+    public HttpClient getHttpClient( String host, int port, byte[] cert ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
+        return getHttpClient( host, port, cert, false );
+    }
+
+    public HttpClient getHttpClient( String host, int port, byte[] cert, boolean hostNameChk ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        return getHttpClient( host, port, cert, hostNameChk, EnumTLS.SSL );
+    }
+
+    public HttpClient getHttpClient( String host, int port, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
         String key = new StringBuilder( host ).append( port ).toString();
 
         HttpClient httpClient = httpClientMap.get( key );
         if ( httpClient == null ) {
             synchronized ( HttpClientFactory.class ) {
                 if ( httpClientMap.get( key ) == null ) {
-                    createHttpClient( key, host );
+                    createHttpClient( key, host, cert, hostNameChk, enumTls );
                 }
                 httpClient = httpClientMap.get( key );
             }
@@ -99,12 +104,12 @@ public class HttpClientFactory {
         return httpClient;
     }
 
-    private void createHttpClient(String key, String host ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    private void createHttpClient(String key, String host, byte[] cert, boolean hostNameChk, EnumTLS enumTls ) throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
         PoolingHttpClientConnectionManager connManager;
 
         if ( host.contains( "https://" ) && cert != null ) {
-            SSLContext sc = getSSLContext();
-            SSLConnectionSocketFactory sslConnSocFactory = new SSLConnectionSocketFactory( sc, (s, sslSession) -> hostChk);
+            SSLContext sc = getSSLContext( cert, enumTls );
+            SSLConnectionSocketFactory sslConnSocFactory = new SSLConnectionSocketFactory( sc, (s, sslSession) -> !hostNameChk );
 
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
                     .<ConnectionSocketFactory>create()
@@ -172,7 +177,7 @@ public class HttpClientFactory {
         }
     }
 
-    private SSLContext getSSLContext() throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, KeyManagementException {
+    private SSLContext getSSLContext( byte[] cert, EnumTLS enumTls ) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, KeyManagementException {
 
         CertificateFactory certFactory = CertificateFactory.getInstance( "X.509" );
         X509Certificate kmsCertObj = (X509Certificate) certFactory.generateCertificate( new ByteArrayInputStream( cert ) );
@@ -191,7 +196,7 @@ public class HttpClientFactory {
         // 2019.06.11 - ehdvudee
         // common java se 6 is not avaiable TLSv1.1 and TLSv1.2
         // supported java se 6 is avaiable( TLSv1.1 : from u111, TLSv1.2 : from u121 )
-        SSLContext sc = SSLContext.getInstance( "SSL" );
+        SSLContext sc = SSLContext.getInstance( enumTls.getProtocol() );
         sc.init( null, tmf.getTrustManagers(), null );
 
         HttpsURLConnection.setDefaultHostnameVerifier((var1, var2) -> true);

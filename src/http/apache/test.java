@@ -9,14 +9,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.net.ssl.*;
@@ -123,7 +120,12 @@ public class test {
 	@Test
 	public void runWithTLS() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		SSLContext oneSc = getSSLContext();
-		SSLConnectionSocketFactory sslConnSocFactory = new SSLConnectionSocketFactory( oneSc, new NoopHostnameVerifier() );
+		SSLConnectionSocketFactory sslConnSocFactory = new SSLConnectionSocketFactory(oneSc, new HostnameVerifier() {
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
+                return false;
+            }
+        });
 
 		CloseableHttpClient httpClient = HttpClients
 				.custom()

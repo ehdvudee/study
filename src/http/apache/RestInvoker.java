@@ -74,10 +74,14 @@ public class RestInvoker implements IInvoker {
     public static void main( String[] args ) {
         ConcreteInjector injector = new ConcreteInjector();
 
+        String host = injector.getHostAl();
+        int port = injector.getPortAl();
+        HttpClient httpClient = injector.getHttpClient( host, port );
+
         IInvoker invoker = new RestInvoker(
-                injector.getHost(),
-                injector.getPort(),
-                injector.getHttpClient()
+                host,
+                port,
+                httpClient
         );
 
         String ret = invoker.invokeHttp( "df", null, "GET", null );
