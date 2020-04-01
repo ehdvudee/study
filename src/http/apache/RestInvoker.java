@@ -9,15 +9,11 @@ import java.util.Map;
 
 public class RestInvoker implements IInvoker {
 
-    private final HttpClient httpClient;
-
-    public RestInvoker( HttpClient httpClient ) {
-        this.httpClient = httpClient;
-    }
-
     @Override
     public String invokeHttp( String host, String path, String httpMethod, Map<String, String> headers, String body ) {
+
         try {
+            HttpClient httpClient = HttpClientFactory.getInstance().getHttpClient( host );
             HttpRequestBase httpReq = getHttpUriRequest( host, path, httpMethod );
 
             setDefaultHeaders( httpReq );
@@ -68,9 +64,9 @@ public class RestInvoker implements IInvoker {
         ConcreteInjector injector = new ConcreteInjector();
 
         String host = injector.getHostAl();
-        IInvoker invoker = injector.getInvoker( host );
+        IInvoker invoker = injector.getInvoker();
 
-        String ret = invoker.invokeHttp( host, "/company/user-info/ehdvudee", "GET", null,null );
+        String ret = invoker.invokeHttp( host, "/company/user-info/ehdvukadee", "GET", null,null );
 
         System.out.println( ret );
     }
