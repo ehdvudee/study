@@ -39,14 +39,6 @@ public class SSLContextUtils {
         SSLContext sc = SSLContext.getInstance( TlsAlgoName );
         sc.init( null, tmf.getTrustManagers(), null );
 
-        HttpsURLConnection.setDefaultHostnameVerifier( new HostnameVerifier() {
-			
-			@Override
-			public boolean verify(String var1, SSLSession var2) {
-				return !chkHostName;
-			}
-		});
-        
         return sc;
     }
 }
