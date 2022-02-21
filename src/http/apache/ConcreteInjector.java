@@ -1,6 +1,7 @@
 package http.apache;
 
 
+import http.IInvoker;
 import org.apache.http.client.HttpClient;
 
 import javax.xml.bind.DatatypeConverter;
